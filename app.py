@@ -252,8 +252,13 @@ with tab1:
                 attr_params = [max_price, min_rating, cat_id]
 
                 if color_pref:
-                    attr_query += " AND p.color IN ({})".format(','.join(['?'] * len(color_pref)))
-                    attr_params.extend(color_pref)
+                    #attr_query += " AND p.color IN ({})".format(','.join(['?'] * len(color_pref)))
+                    #attr_params.extend(color_pref)
+                    # Use LIKE for partial matches (e.g., 'Grey' matches 'Eclipse Grey')
+                    color_clauses = " OR ".join(["p.color LIKE ?"] * len(color_pref))
+                    attr_query += f" AND ({color_clauses})"
+                    # Add % wildcards to each color in the list
+                    attr_params.extend([f"%{c}%" for c in color_pref])
                 if brand_pref:
                     attr_query += " AND p.brand IN ({})".format(','.join(['?'] * len(brand_pref)))
                     attr_params.extend(brand_pref)
@@ -285,8 +290,13 @@ with tab1:
                 prod_params = [max_price, min_rating, cat_id]
 
                 if color_pref:
-                    prod_query += " AND color IN ({})".format(','.join(['?'] * len(color_pref)))
-                    prod_params.extend(color_pref)
+                    #prod_query += " AND color IN ({})".format(','.join(['?'] * len(color_pref)))
+                    #prod_params.extend(color_pref)
+                    # Use LIKE so 'Grey' + 'Gaming' returns 'Eclipse Grey' gaming laptops
+                    color_clauses = " OR ".join(["color LIKE ?"] * len(color_pref))
+                    prod_query += f" AND ({color_clauses})"
+                    # Add % wildcards so SQLite finds the word anywhere in the string
+                    prod_params.extend([f"%{c}%" for c in color_pref])
                 if brand_pref:
                     prod_query += " AND brand IN ({})".format(','.join(['?'] * len(brand_pref)))
                     prod_params.extend(brand_pref)
